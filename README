@@ -1,42 +1,62 @@
 Gearman::Mesh
 
+ thin wrappers around Gearman::XS modules
 
+GEARMAND INSTALLATION
 
+Installation will work without gearmand installed, but the distribution
+will not be of much use.  To install gearmand:
 
-INSTALLATION
+CentOS
+------
 
-To install this module, run the following commands:
+You'll need the EPEL repository installed.  After that:
 
-	perl Build.PL
-	./Build
-	./Build test
-	./Build install
+ yum install gearmand
+
+ # To start the service:
+ service start gearmand
+
+ # To enable at boot:
+ chkconfig --level 245 gearmand on
+
+OS X
+----
+
+Using Homebrew:
+
+ brew install gearman
+
+Using MacPorts (sudo may be required):
+
+ port install gearmand
+
+GEARMAN::MESH INSTALLATION
+
+You can install Gearman::Mesh directly from GitHub with App::cpanminus:
+
+ cpanm git@github.com:mikeraynham/Gearman-Mesh.git
+
+Alternatively, if you have downloaded the distribution, run the following
+commands:
+
+ perl Build.PL
+ ./Build
+ ./Build test
+ ./Build install
 
 SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
 perldoc command.
 
-    perldoc Gearman::Mesh
-
-You can also look for information at:
-
-    RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Gearman::Mesh
-
-    AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Gearman::Mesh
-
-    CPAN Ratings
-        http://cpanratings.perl.org/d/Gearman::Mesh
-
-    Search CPAN
-        http://search.cpan.org/dist/Gearman::Mesh/
-
+ perldoc Gearman::Mesh
+ perldoc Gearman::Mesh::Client
+ perldoc Gearman::Mesh::Worker
 
 LICENSE AND COPYRIGHT
 
-Copyright (C) 2014 Mike Raynham
+Copyright (C) 2014 Mike Raynham, SpareRoom
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a
