@@ -88,7 +88,7 @@ sub new {
     shift->SUPER::new('Gearman::XS::Worker', @_);
 }
 
-=head1 SUBROUTINES/METHODS
+=head1 METHODS
 
 =head2 add_function
 
@@ -122,6 +122,20 @@ sub add_function {
         $self->serialize([$args]),
     );
 }
+
+=head2 add_functions
+
+ add_functions(
+     $name => $coderef,
+     $name => $coderef,
+     ...
+ );
+
+A simple wrapper around add_function() which allows multiple functions to
+be added with a single call.  It is not possible to specify $args or
+$timeout with this method.
+
+=cut
 
 sub add_functions {
     my $self      = shift;

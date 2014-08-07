@@ -8,6 +8,13 @@ use Gearman::XS 0.16 qw(:constants);
 use Gearman::Mesh::Client;
 use Gearman::Mesh::Worker;
 
+{
+    my $worker = Gearman::Mesh::Worker->new(servers => 'localhost:4730');
+
+    plan(skip_all => 'gearmand must be running on localhost to run this test')
+        if $worker->echo('ping') != GEARMAN_SUCCESS;
+}
+
 my ($fh, $tmp_file) = tempfile();
 
 my $pid = fork();
@@ -20,14 +27,13 @@ if ($pid == 0) {
     # Make sure that we correctly serialize and deserialize Unicode strings,
     # and strings that contain null characters.
     my $test_args = {
-        arg1 => "\x{2699}\x{1F468}\x{0}\x{0}\x{3BCC}",
-        arg2 => "\x{3BCC}\x{0}\x{0}\x{2699}\x{1F468}",
+        arg => "\x{2699}\x{1F468}\x{0}\x{0}\x{3BCC}",
     };
     
     my $worker = Gearman::Mesh::Worker->new(servers => {localhost => 4730});
 
     $worker->add_function(
-        'sum', sub {
+        sum => sub {
             my $job      = shift;
             my $args     = shift;
             my $workload = shift;
@@ -36,27 +42,18 @@ if ($pid == 0) {
             print $out "$workload\n";
             close $out;
 
-            is_deeply(
-                $args,
-                $test_args,
-                "($workload) args deserialized and passed to job"
-            );
-
-            $job->send_complete($workload);
+            $job->send_complete($args->{arg} eq $test_args->{arg});
         },
         $test_args,
     );
 
     $worker->add_function(
-        'no_args', sub {
+        no_args => sub {
             my $job      = shift;
             my $args     = shift;
             my $workload = shift;
 
-            is($args, '', '$args is empty');
-            is($workload, undef, '$workload is not defined');
-
-            $job->send_complete(123);
+            $job->send_complete($args eq '' && !defined $workload);
         },
     );
 
@@ -78,7 +75,6 @@ if ($pid == 0) {
         last if $no_jobs >= 3;
     }
 
-    done_testing;
     exit;
 }
 else {
@@ -93,12 +89,13 @@ else {
         my $result = 0;
 
         for my $function (qw(do do_high do_low)) {
-            $result += $client->$function(sum => $num);
+            ok( $client->$function(sum => $num),
+                "$function() parses args and workload correctly"
+            );
             $num = $num << 1;
         }
 
-        is($result, 7, 'foreground job results correct');
-        is($client->do('no_args'), 123, 'job with no args runs as expected');
+        ok($client->do('no_args'), 'job with no args runs as expected');
     };
 
     subtest 'asynchronous jobs' => sub {
