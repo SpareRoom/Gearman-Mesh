@@ -1,5 +1,0 @@
-do{ my $x = {
-       'blib' => 1,
-       'Gearman::Mesh-*' => 1
-     };
-$x; }
