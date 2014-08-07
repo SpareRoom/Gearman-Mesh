@@ -31,7 +31,7 @@ use Gearman::Mesh qw(
 );
 
 use Exporter 5.57 qw(import);
-use Gearman::XS qw(:constants);
+use Gearman::XS 0.16 qw(:constants);
 
 our @EXPORT_OK   = @Gearman::XS::EXPORT_OK;
 our %EXPORT_TAGS = %Gearman::XS::EXPORT_TAGS;

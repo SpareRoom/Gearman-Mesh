@@ -2,7 +2,7 @@ package Gearman::Mesh::Worker;
 
 use 5.006;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 
 use parent 'Gearman::Mesh';
 
@@ -27,9 +27,11 @@ use Gearman::Mesh qw(
     set_log_fn
 );
 
+use Scalar::Util qw(weaken refaddr);
+use Data::Dumper;
 use Exporter 5.57 qw(import);
-use Gearman::XS qw(:constants);
-
+use Gearman::XS 0.16 qw(:constants);
+ 
 our @EXPORT_OK   = @Gearman::XS::EXPORT_OK;
 our %EXPORT_TAGS = %Gearman::XS::EXPORT_TAGS;
 
@@ -103,27 +105,31 @@ sub add_function {
     my $name    = shift;
     my $coderef = shift;
     my $args    = shift;
-    my $timeout = shift || 0;
+    my $timeout = shift;
 
-    my $serialized_args = $self->serialize([$args]);
+    $args    = '' unless defined $args;
+    $timeout = 0  unless defined $timeout;
 
     $self->{_delegate}->add_function(
         $name,
         $timeout,
         sub {
-            my $_job      = shift;
-            my $_args     = shift;
-            my $_workload = $_job->workload;
+            my ($args)     = @{$self->deserialize($_[1])};
+            my ($workload) = @{$self->deserialize($_[0]->workload)};
 
-            ($_args)     = @{$self->deserialize($_args)};
-            ($_workload) = @{$self->deserialize($_workload)};
-
-            @_ = ($_job, $_args, $_workload);
-
-            goto $coderef;
+            $coderef->($_[0], $args, $workload);
         },
-        $serialized_args,
+        $self->serialize([$args]),
     );
+}
+
+sub add_functions {
+    my $self      = shift;
+    my %functions = @_;
+
+    while (my ($name, $coderef) = each %functions) {
+        $self->add_function($name, $coderef);
+    }
 }
 
 =head2 add_server, remove_servers, echo, work, grab_job, error, options

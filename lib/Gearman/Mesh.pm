@@ -5,7 +5,8 @@ use strict;
 use warnings FATAL => 'all';
 
 use Carp qw(croak);
-use Gearman::XS qw(:constants);
+use Gearman::XS 0.16 qw(:constants);
+use JSON::XS;
 
 =head1 NAME
 
@@ -54,7 +55,6 @@ sub new {
     my %args     = @_;
 
     if (not exists $args{serialize_methods}) {
-        require JSON::XS;
         $args{serialize_methods} ||= [
             \&JSON::XS::encode_json,
             \&JSON::XS::decode_json,
