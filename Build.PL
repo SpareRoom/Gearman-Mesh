@@ -5,10 +5,10 @@ use Module::Build;
 
 my $builder = Module::Build->new(
     module_name         => 'Gearman::Mesh',
-    license             => 'Artistic_2_0',
+    license             => 'artistic_2',
     dist_author         => q{Mike Raynham, SpareRoom <enquiries@mikeraynham.co.uk>},
     dist_version_from   => 'lib/Gearman/Mesh.pm',
-    release_status      => 'stable',
+    release_status      => 'unstable',
     configure_requires => {
         'Module::Build' => 0,
     },
@@ -16,11 +16,15 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
     },
     requires => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'Gearman::XS' => 0.16,
     },
     add_to_cleanup     => [ 'Gearman-Mesh-*' ],
     create_makefile_pl => 'traditional',
+    meta_merge => {
+        resources => {
+            repository => 'https://github.com/mikeraynham/Gearman-Mesh',
+        }
+    },
 );
 
 $builder->create_build_script();

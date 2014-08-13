@@ -110,10 +110,13 @@ for Gearman.  They provide a simpler interface than L<Gearman::XS>.
 L<AnyEvent::Gearman> provides asynchronous Gearman client and worker modules
 for L<AnyEvent> applications.
 
-
 =head1 AUTHOR
 
 Mike Raynham, C<< <enquiries at mikeraynham.co.uk> >>
+
+=head1 REPOSITORY
+
+L<https://github.com/mikeraynham/Gearman-Mesh>
 
 =head1 BUGS
 
