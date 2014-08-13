@@ -146,6 +146,54 @@ sub add_functions {
     }
 }
 
+=head2 work_loop
+
+ $worker->work_loop;
+
+Sets the worker to non-blocking mode with a time-out of 1 second.  The worker
+is then placed in an event loop.  The loop will be terminated gracefully if
+the process receives a SIG_TERM or SIG_INT.
+
+The commonly shown alternative is:
+
+ while (1) {
+     $worker->work();
+ }
+
+This can cause jobs to terminate before completion if the worker process
+receives a SIG_TERM or SIG_INT.  Using work_loop() allows jobs to finish
+gracefully.
+
+=cut
+
+sub work_loop {
+    my $self    = shift;
+    my $worker  = $self->{_delegate};
+    my $options = $worker->options;
+    my $timeout = $worker->timeout;
+
+    $worker->add_options(GEARMAN_WORKER_NON_BLOCKING);
+    $worker->set_timeout(1_000);
+
+    {
+        my $continue = 1;
+        my $handler  = sub {$continue = 0};
+
+        local $SIG{TERM} = $handler;
+        local $SIG{INT}  = $handler;
+
+        while ($continue) {
+            $worker->work;
+            $worker->wait;
+        }
+    }
+
+    $worker->set_options($options);
+    $worker->set_timeout($timeout);
+
+    return 1;
+}
+
 =head2 add_server, remove_servers, echo, work, grab_job, error, options
 =head2 set_options, add_options, remove_options, timeout, set_timeout
 =head2 register, unregister, unregister_all, function_exist, wait, set_log_fn

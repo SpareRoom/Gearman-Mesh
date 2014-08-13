@@ -6,7 +6,7 @@ use Module::Build;
 my $builder = Module::Build->new(
     module_name         => 'Gearman::Mesh',
     license             => 'Artistic_2_0',
-    dist_author         => q{Mike Raynham <enquiries@mikeraynham.co.uk>},
+    dist_author         => q{Mike Raynham, SpareRoom <enquiries@mikeraynham.co.uk>},
     dist_version_from   => 'lib/Gearman/Mesh.pm',
     release_status      => 'stable',
     configure_requires => {
@@ -19,7 +19,7 @@ my $builder = Module::Build->new(
         #'ABC'              => 1.6,
         #'Foo::Bar::Module' => 5.0401,
     },
-    add_to_cleanup     => [ 'Gearman::Mesh-*' ],
+    add_to_cleanup     => [ 'Gearman-Mesh-*' ],
     create_makefile_pl => 'traditional',
 );
 
