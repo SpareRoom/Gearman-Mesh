@@ -17,6 +17,7 @@ my $builder = Module::Build->new(
     },
     requires => {
         'Gearman::XS' => 0.16,
+        'JSON::XS'    => 0,
     },
     add_to_cleanup     => [ 'Gearman-Mesh-*' ],
     create_makefile_pl => 'traditional',
