@@ -32,6 +32,7 @@ use Gearman::Mesh qw(
 
 use Exporter 5.57 qw(import);
 use Gearman::XS 0.16 qw(:constants);
+use Time::HiRes ();
 
 our @EXPORT_OK   = @Gearman::XS::EXPORT_OK;
 our %EXPORT_TAGS = %Gearman::XS::EXPORT_TAGS;
@@ -59,14 +60,30 @@ BEGIN {
         eval join("\n",
             qq`package $pkg;`,
             qq`sub $job {`,
-             q`my $self = shift;`,
-             q`my $task = shift;`,
-             q`my $args = $self->serialize([@_]);`,
-            qq`my \@ret = \$self->{_delegate}->$job(\$task, \$args);`,
-             q`return if $ret[0] ne GEARMAN_SUCCESS;`,
-             q`return $ret[1];`,
+             q`    my $self    = shift;`,
+             q`    my $task    = shift;`,
+             q`    my $args    = $self->serialize([@_]);`,
+             q`    my $backoff = _backoff(10, 1000);`,
+             q`    my @ret;`,
+             q`    while (1) {`,
+            qq`        \@ret = \$self->{_delegate}->$job(\$task, \$args);`,
+             q`        last if defined $ret[0] && $ret[0] eq GEARMAN_SUCCESS;`,
+             q`        last unless $backoff->();`,
+             q`    }`,
+             q`    return $ret[1];`,
              q`}`,
         );
+    }
+}
+
+sub _backoff {
+    my $tries = shift;
+    my $scale = shift;
+    my $try   = 0;
+    
+    sub {
+        return if ++$try > $tries;
+        Time::HiRes::usleep( $scale << int rand($try) );
     }
 }
 
@@ -76,11 +93,11 @@ Gearman::Mesh::Client - A wrapper around Gearman::XS::Client
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 =head1 SYNOPSIS
@@ -112,7 +129,9 @@ This module optionally re-exports the constants from L<Gearman::XS>:
 =cut
 
 sub new {
-    shift->SUPER::new('Gearman::XS::Client', @_);
+    my $self = shift->SUPER::new('Gearman::XS::Client', @_);
+    $self->set_timeout(1_000);
+    $self;
 }
 
 =head1 METHODS
@@ -126,16 +145,10 @@ sub new {
  my $task = $client->add_task($function_name => $workload);
 
 Each of these methods are wrapped in a method that serializes C<$workload>
-before calling the equivalent L<Gearman::XS::Client> method:
+before calling the equivalent L<Gearman::XS::Client> method.
 
- sub do {
-     my $self = shift;
-     my $task = shift;
-     my $args = $self->serialize([@_]);
-     my @ret = $self->{gearman_client}->do($task, $args);
-     return if $ret[0] ne GEARMAN_SUCCESS;
-     return $ret[1];
- }
+Each method will retry up to ten times, using an exponential backoff algorithm
+to determine the delay between retries.
 
 Job methods (those whose names begin with C<do>) will return the job handle on
 success.  Task methods (those whose name begin with C<add_task>) will return a

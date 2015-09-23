@@ -41,11 +41,11 @@ Gearman::Mesh::Worker - The great new Gearman::Mesh::Worker!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -172,8 +172,21 @@ sub work_loop {
     my $options = $worker->options;
     my $timeout = $worker->timeout;
 
-    $worker->add_options(GEARMAN_WORKER_NON_BLOCKING);
     $worker->set_timeout(1_000);
+
+    my $work_ok = sub {
+        my $code = shift;
+        return 1 if $code eq GEARMAN_IO_WAIT
+                 || $code eq GEARMAN_NO_JOBS
+                 || $code eq GEARMAN_TIMEOUT;
+    };
+
+    my $wait_ok = sub {
+        my $code = shift;
+        return 1 if $code eq GEARMAN_SUCCESS
+                 || $code eq GEARMAN_NO_ACTIVE_FDS
+                 || $code eq GEARMAN_TIMEOUT;
+    };
 
     {
         my $continue = 1;
@@ -182,9 +195,20 @@ sub work_loop {
         local $SIG{TERM} = $handler;
         local $SIG{INT}  = $handler;
 
-        while ($continue) {
-            $worker->work;
-            $worker->wait;
+        TRY: while ($continue) {
+
+            my $work = $worker->work;
+            next TRY if $work == GEARMAN_SUCCESS;
+
+            sleep 1;
+
+            if ($work_ok->($work)) {
+                my $wait = $worker->wait;
+                next TRY if $wait_ok->($wait);
+            }
+
+            warn $worker->error;
+            sleep 5; 
         }
     }
 

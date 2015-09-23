@@ -2,4 +2,5 @@ Revision history for Gearman-Mesh
 
 0.01    Date/time
         First version, released on an unsuspecting world.
-
+0.02    2015-09-21
+        Added automatic retries to worker and client.
