@@ -10,6 +10,7 @@ use Gearman::Mesh::Worker;
 
 {
     my $worker = Gearman::Mesh::Worker->new(servers => 'localhost:4730');
+    $worker->set_timeout(1000);
 
     plan(skip_all => 'gearmand must be running on localhost to run this test')
         if $worker->echo('ping') != GEARMAN_SUCCESS;
