@@ -4,3 +4,5 @@ Revision history for Gearman-Mesh
         First version, released on an unsuspecting world.
 0.02    2015-09-21
         Added automatic retries to worker and client.
+0.03    2016-03-15
+        Support for coalescing.
