@@ -59,14 +59,20 @@ BEGIN {
         
         eval join("\n",
             qq`package $pkg;`,
+             q`require Carp;`,
             qq`sub $job {`,
-             q`    my $self    = shift;`,
-             q`    my $task    = shift;`,
-             q`    my $args    = $self->serialize([@_]);`,
-             q`    my $backoff = _backoff(10, 1000);`,
+             q`    my $self     = shift;`,
+             q`    my $task     = shift;`,
+             q`    my $workload = shift;`,
+             q`    my $unique   = shift;`,
+             q`    my $backoff  = _backoff(10, 1000);`,
              q`    my @ret;`,
              q`    while (1) {`,
-            qq`        \@ret = \$self->{_delegate}->$job(\$task, \$args);`,
+            qq`        \@ret = \$self->{_delegate}->$job(`,
+             q`            $task,`,
+             q`            $self->serialize([$workload]),`,
+             q`            defined $unique ? $unique : (),`,
+             q`        );`,
              q`        last if defined $ret[0] && $ret[0] eq GEARMAN_SUCCESS;`,
              q`        last unless $backoff->();`,
              q`    }`,
@@ -141,8 +147,8 @@ sub new {
 =head2 add_task, add_task_high, add_task_low
 =head2 add_task_background, add_task_high_background, add_task_low_background
 
- my $job_handle = $client->do($function_name => $workload);
- my $task = $client->add_task($function_name => $workload);
+ my $job_handle = $client->do($function_name => $workload, $unique?);
+ my $task = $client->add_task($function_name => $workload, $unique?);
 
 Each of these methods are wrapped in a method that serializes C<$workload>
 before calling the equivalent L<Gearman::XS::Client> method.
@@ -154,6 +160,12 @@ Job methods (those whose names begin with C<do>) will return the job handle on
 success.  Task methods (those whose name begin with C<add_task>) will return a
 L<Gearman::XS::Task> object on success.  On failure, the methods will return
 nothing.
+
+The optional C<$unique> parameter is a string that uniquely identifies the job.
+It is used by gearmand to coalesce jobs: if multiple clients request a job with
+the same unique identifier, gearmand will perform the job only once and return
+the result to all the clients that requested it.  Please note that this only
+works for jobs that are in the same queue at the same time.
 
 =head2 add_server, remove_servers, options, set_options, add_options
 =head2 remove_options, timeout, set_timeout, echo, run_tasks, set_created_fn

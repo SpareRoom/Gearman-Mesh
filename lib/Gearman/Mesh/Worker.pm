@@ -28,9 +28,9 @@ use Gearman::Mesh qw(
 );
 
 use Scalar::Util qw(weaken refaddr);
-use Data::Dumper;
 use Exporter 5.57 qw(import);
 use Gearman::XS 0.16 qw(:constants);
+use Sub::Name;
  
 our @EXPORT_OK   = @Gearman::XS::EXPORT_OK;
 our %EXPORT_TAGS = %Gearman::XS::EXPORT_TAGS;
@@ -113,12 +113,12 @@ sub add_function {
     $self->{_delegate}->add_function(
         $name,
         $timeout,
-        sub {
+        subname($name, sub {
             my ($args)     = @{$self->deserialize($_[1])};
             my ($workload) = @{$self->deserialize($_[0]->workload)};
 
             $coderef->($_[0], $args, $workload);
-        },
+        }),
         $self->serialize([$args]),
     );
 }
