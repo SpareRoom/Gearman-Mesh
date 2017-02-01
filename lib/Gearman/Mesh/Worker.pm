@@ -172,9 +172,10 @@ sub work_loop {
 
     my $work_ok = sub {
         my $code = shift;
-        return 1 if $code eq GEARMAN_IO_WAIT
-                 || $code eq GEARMAN_NO_JOBS
-                 || $code eq GEARMAN_TIMEOUT;
+        return 1 if $code == GEARMAN_IO_WAIT
+                 || $code == GEARMAN_NO_JOBS
+                 || $code == GEARMAN_TIMEOUT;
+        return;
     };
 
     {
@@ -184,11 +185,10 @@ sub work_loop {
         local $SIG{TERM} = $handler;
         local $SIG{INT}  = $handler;
 
-        TRY: while ($continue) {
-
+        while ($continue) {
             my $work = $worker->work;
-            next TRY if $work == GEARMAN_SUCCESS;
-            sleep 1, next TRY if $work_ok->($work);
+            next if $work == GEARMAN_SUCCESS;
+            sleep 1, next if $work_ok->($work);
 
             warn $worker->error;
             sleep 5; 

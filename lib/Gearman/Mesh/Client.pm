@@ -119,9 +119,7 @@ This module optionally re-exports the constants from L<Gearman::XS>:
 =cut
 
 sub new {
-    my $self = shift->SUPER::new('Gearman::XS::Client', @_);
-    $self->set_timeout(1_000);
-    $self;
+    shift->SUPER::new('Gearman::XS::Client', @_);
 }
 
 =head1 METHODS
