@@ -168,7 +168,7 @@ sub work_loop {
     my $options = $worker->options;
     my $timeout = $worker->timeout;
 
-    $worker->set_timeout(500);
+    $worker->set_timeout(1_000)
 
     my $work_ok = sub {
         my $code = shift;

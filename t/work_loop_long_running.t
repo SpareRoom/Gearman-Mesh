@@ -32,11 +32,18 @@ if ($pid == 0) {
 
     $worker->add_function(
         long_running => sub {
-            my ($job, $args, $workload) = @_;
+            my (undef, undef, $workload) = @_;
             for my $i (1..5) {
                 $bucket->print($i);
                 sleep 1;
             }
+        },
+    );
+
+    $worker->add_function(
+        worker_ready => sub {
+            my ($job) = @_;
+            $job->send_complete(1);
         },
     );
 
@@ -49,6 +56,8 @@ else {
     $bucket->reader;
 
     my $client = Gearman::Mesh::Client->new(servers => {'127.0.0.1' => 4730});
+
+    ok($client->do('worker_ready'), 'worker is ready');
 
     $client->do_background('long_running');
 
