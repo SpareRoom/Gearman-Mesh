@@ -13,7 +13,11 @@ my $builder = Module::Build->new(
         'Module::Build' => 0,
     },
     build_requires => {
+        'File::Which' => 0,
+        'Proc::Guard' => 0,
+        'Test::Fatal' => 0,
         'Test::More' => 0,
+        'Test::TCP' => 0,
     },
     requires => {
         'Gearman::XS' => 0.16,

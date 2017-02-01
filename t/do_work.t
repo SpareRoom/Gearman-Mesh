@@ -3,18 +3,15 @@ use warnings;
 
 use Test::More;
 use File::Temp qw(tempfile);
+use FindBin qw( $Bin );
+use lib ("$Bin/lib", "$Bin/../lib");
+use TestGearman;
 
 use Gearman::XS 0.16 qw(:constants);
 use Gearman::Mesh::Client;
 use Gearman::Mesh::Worker;
 
-{
-    my $worker = Gearman::Mesh::Worker->new(servers => '127.0.0.1:4730');
-    $worker->set_timeout(1000);
-
-    plan(skip_all => 'gearmand must be running on 127.0.0.1 to run this test')
-        if $worker->echo('ping') != GEARMAN_SUCCESS;
-}
+my $tg = TestGearman->new;
 
 my ($fh, $tmp_file) = tempfile();
 
@@ -31,7 +28,7 @@ if ($pid == 0) {
         arg => "\x{2699}\x{1F468}\x{0}\x{0}\x{3BCC}",
     };
     
-    my $worker = Gearman::Mesh::Worker->new(servers => {'127.0.0.1' => 4730});
+    my $worker = Gearman::Mesh::Worker->new(servers => {$tg->host, $tg->port});
 
     $worker->add_function(
         sum => sub {
@@ -80,7 +77,7 @@ if ($pid == 0) {
 }
 else {
 
-    my $client = Gearman::Mesh::Client->new(servers => {'127.0.0.1' => 4730});
+    my $client = Gearman::Mesh::Client->new(servers => {$tg->host, $tg->port});
     my $num    = 1;
 
     subtest 'synchronous jobs' => sub {

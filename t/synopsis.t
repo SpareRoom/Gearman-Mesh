@@ -2,17 +2,16 @@ use strict;
 use warnings;
 
 use Test::More;
+use FindBin qw( $Bin );
+use lib ("$Bin/lib", "$Bin/../lib");
+use TestGearman;
 
 use Gearman::Mesh::Client qw(:constants);
 use Gearman::Mesh::Worker;
 
-my $worker = Gearman::Mesh::Worker->new(servers => '127.0.0.1:4730');
-
-if ($worker->echo('ping') != GEARMAN_SUCCESS) {
-    plan(skip_all => 'gearmand must be running on 127.0.0.1 to run this test');
-}
-
-my $client = Gearman::Mesh::Client->new(servers => '127.0.0.1:4730');
+my $tg     = TestGearman->new;
+my $worker = Gearman::Mesh::Worker->new(servers => {$tg->host, $tg->port});
+my $client = Gearman::Mesh::Client->new(servers => {$tg->host, $tg->port});
 
 my @result;
 

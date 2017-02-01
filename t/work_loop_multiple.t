@@ -4,19 +4,15 @@ use warnings;
 use Test::More;
 use IO::Pipe;
 use POSIX qw(SIGTERM);
+use FindBin qw( $Bin );
+use lib ("$Bin/lib", "$Bin/../lib");
+use TestGearman;
 
 use Gearman::XS 0.16 qw(:constants);
 use Gearman::Mesh::Client;
 use Gearman::Mesh::Worker;
 
-{
-    my $worker = Gearman::Mesh::Worker->new(servers => '127.0.0.1:4730');
-    $worker->set_timeout(1000);
-
-    plan(skip_all => 'gearmand must be running on 127.0.0.1 to run this test')
-        if $worker->echo('ping') != GEARMAN_SUCCESS;
-}
-
+my $tg     = TestGearman->new;
 my $bucket = IO::Pipe->new;
 my $pid    = fork();
 
@@ -28,7 +24,7 @@ if ($pid == 0) {
     $bucket->autoflush(1);
     $bucket->blocking(0);
 
-    my $worker = Gearman::Mesh::Worker->new(servers => {'127.0.0.1' => 4730});
+    my $worker = Gearman::Mesh::Worker->new(servers => {$tg->host, $tg->port});
 
     $worker->add_function(
         append => sub {
@@ -45,7 +41,7 @@ else {
     # Parent process
     $bucket->reader;
 
-    my $client = Gearman::Mesh::Client->new(servers => {'127.0.0.1' => 4730});
+    my $client = Gearman::Mesh::Client->new(servers => {$tg->host, $tg->port});
 
     for my $num (1..5) {
         $client->do(append => $num);
