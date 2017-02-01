@@ -10,7 +10,7 @@ subtest 'add servers' => sub {
 
     is( exception {
             Gearman::Mesh::Worker->new(
-                servers => '127.0.0.1:4730,localhost:4730',
+                servers => '127.0.0.1:4730,127.0.0.2:4730',
             ),
         },
         undef,
@@ -21,7 +21,7 @@ subtest 'add servers' => sub {
             Gearman::Mesh::Worker->new(
                 servers => [
                     '127.0.0.1:4730',
-                    'localhost:4730',
+                    '127.0.0.2:4730',
                 ],
             ),
         },
@@ -33,7 +33,7 @@ subtest 'add servers' => sub {
             Gearman::Mesh::Worker->new(
                 servers => {
                     '127.0.0.1' => 4730,
-                    'localhost' => 4730,
+                    '127.0.0.2' => 4730,
                 },
             ),
         },
@@ -70,7 +70,7 @@ can_ok($worker, qw(
     set_log_fn
 ));
 
-is( $worker->add_server('localhost', 4730),
+is( $worker->add_server('127.0.0.1', 4730),
     GEARMAN_SUCCESS,
     'worker can add server'
 );

@@ -9,10 +9,10 @@ use Gearman::Mesh::Client;
 use Gearman::Mesh::Worker;
 
 {
-    my $worker = Gearman::Mesh::Worker->new(servers => 'localhost:4730');
+    my $worker = Gearman::Mesh::Worker->new(servers => '127.0.0.1:4730');
     $worker->set_timeout(1000);
 
-    plan(skip_all => 'gearmand must be running on localhost to run this test')
+    plan(skip_all => 'gearmand must be running on 127.0.0.1 to run this test')
         if $worker->echo('ping') != GEARMAN_SUCCESS;
 }
 
@@ -31,7 +31,7 @@ if ($pid == 0) {
         arg => "\x{2699}\x{1F468}\x{0}\x{0}\x{3BCC}",
     };
     
-    my $worker = Gearman::Mesh::Worker->new(servers => {localhost => 4730});
+    my $worker = Gearman::Mesh::Worker->new(servers => {'127.0.0.1' => 4730});
 
     $worker->add_function(
         sum => sub {
@@ -80,7 +80,7 @@ if ($pid == 0) {
 }
 else {
 
-    my $client = Gearman::Mesh::Client->new(servers => {localhost => 4730});
+    my $client = Gearman::Mesh::Client->new(servers => {'127.0.0.1' => 4730});
     my $num    = 1;
 
     subtest 'synchronous jobs' => sub {

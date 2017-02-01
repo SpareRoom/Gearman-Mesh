@@ -6,13 +6,13 @@ use Test::More;
 use Gearman::Mesh::Client qw(:constants);
 use Gearman::Mesh::Worker;
 
-my $worker = Gearman::Mesh::Worker->new(servers => 'localhost:4730');
+my $worker = Gearman::Mesh::Worker->new(servers => '127.0.0.1:4730');
 
 if ($worker->echo('ping') != GEARMAN_SUCCESS) {
-    plan(skip_all => 'gearmand must be running on localhost to run this test');
+    plan(skip_all => 'gearmand must be running on 127.0.0.1 to run this test');
 }
 
-my $client = Gearman::Mesh::Client->new(servers => 'localhost:4730');
+my $client = Gearman::Mesh::Client->new(servers => '127.0.0.1:4730');
 
 my @result;
 

@@ -37,7 +37,7 @@ our %EXPORT_TAGS = %Gearman::XS::EXPORT_TAGS;
 
 =head1 NAME
 
-Gearman::Mesh::Worker - The great new Gearman::Mesh::Worker!
+Gearman::Mesh::Worker - A wrapper around Gearman::XS::Worker
 
 =head1 VERSION
 
@@ -48,10 +48,6 @@ Version 0.03
 our $VERSION = '0.03';
 
 =head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
 
  use Gearman::Mesh::Worker qw(:constants);
 
