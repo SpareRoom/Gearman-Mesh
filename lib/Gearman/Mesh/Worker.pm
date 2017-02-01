@@ -168,7 +168,7 @@ sub work_loop {
     my $options = $worker->options;
     my $timeout = $worker->timeout;
 
-    $worker->set_timeout(1_000);
+    $worker->set_timeout(500);
 
     my $work_ok = sub {
         my $code = shift;
@@ -195,8 +195,6 @@ sub work_loop {
 
             my $work = $worker->work;
             next TRY if $work == GEARMAN_SUCCESS;
-
-            sleep 1;
 
             if ($work_ok->($work)) {
                 my $wait = $worker->wait;

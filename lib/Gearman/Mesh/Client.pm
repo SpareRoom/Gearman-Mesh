@@ -32,7 +32,6 @@ use Gearman::Mesh qw(
 
 use Exporter 5.57 qw(import);
 use Gearman::XS 0.16 qw(:constants);
-use Time::HiRes ();
 
 our @EXPORT_OK   = @Gearman::XS::EXPORT_OK;
 our %EXPORT_TAGS = %Gearman::XS::EXPORT_TAGS;
@@ -65,31 +64,16 @@ BEGIN {
              q`    my $task     = shift;`,
              q`    my $workload = shift;`,
              q`    my $unique   = shift;`,
-             q`    my $backoff  = _backoff(10, 1000);`,
-             q`    my @ret;`,
-             q`    while (1) {`,
-            qq`        \@ret = \$self->{_delegate}->$job(`,
-             q`            $task,`,
-             q`            $self->serialize([$workload]),`,
-             q`            defined $unique ? $unique : (),`,
-             q`        );`,
-             q`        last if defined $ret[0] && $ret[0] eq GEARMAN_SUCCESS;`,
-             q`        last unless $backoff->();`,
-             q`    }`,
+            qq`    my \@ret = \$self->{_delegate}->$job(`,
+             q`        $task,`,
+             q`        $self->serialize([$workload]),`,
+             q`        defined $unique ? $unique : (),`,
+             q`    );`,
+             q`    return if !defined $ret[0];`,
+             q`    return if $ret[0] ne GEARMAN_SUCCESS;`,
              q`    return $ret[1];`,
              q`}`,
         );
-    }
-}
-
-sub _backoff {
-    my $tries = shift;
-    my $scale = shift;
-    my $try   = 0;
-    
-    sub {
-        return if ++$try > $tries;
-        Time::HiRes::usleep( $scale << int rand($try) );
     }
 }
 
@@ -99,11 +83,11 @@ Gearman::Mesh::Client - A wrapper around Gearman::XS::Client
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 =head1 SYNOPSIS
