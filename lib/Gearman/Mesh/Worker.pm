@@ -177,13 +177,6 @@ sub work_loop {
                  || $code eq GEARMAN_TIMEOUT;
     };
 
-    my $wait_ok = sub {
-        my $code = shift;
-        return 1 if $code eq GEARMAN_SUCCESS
-                 || $code eq GEARMAN_NO_ACTIVE_FDS
-                 || $code eq GEARMAN_TIMEOUT;
-    };
-
     {
         my $continue = 1;
         my $handler  = sub {$continue = 0};
@@ -195,11 +188,7 @@ sub work_loop {
 
             my $work = $worker->work;
             next TRY if $work == GEARMAN_SUCCESS;
-
-            if ($work_ok->($work)) {
-                my $wait = $worker->wait;
-                next TRY if $wait_ok->($wait);
-            }
+            sleep 1, next TRY if $work_ok->($work);
 
             warn $worker->error;
             sleep 5; 
