@@ -6,3 +6,8 @@ Revision history for Gearman-Mesh
         Added automatic retries to worker and client.
 0.03    2016-03-15
         Support for coalescing.
+0.04    2017-02-21
+        Fixed failing tests.
+        Removed client retry.
+        Improved long running worker test.
+        Automatically start gearman daemon in tests.
