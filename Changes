@@ -11,3 +11,5 @@ Revision history for Gearman-Mesh
         Removed client retry.
         Improved long running worker test.
         Automatically start gearman daemon in tests.
+0.05    2019-04-01
+        Fixed failing tests.
