@@ -13,3 +13,5 @@ Revision history for Gearman-Mesh
         Automatically start gearman daemon in tests.
 0.05    2019-04-01
         Fixed failing tests.
+0.06    2019-04-01
+        Fixed failing tests. Used correct value this time.

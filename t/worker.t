@@ -78,14 +78,14 @@ is( $worker->add_server('127.0.0.1', 4730),
 $worker->remove_servers;
 
 is( $worker->work(),
-    GEARMAN_COMMAND_WORK_COMPLETE,
+    GEARMAN_NO_SERVERS,
     'work() method returns expected value'
 );
 
 my ($ret, $job) = $worker->grab_job();
 
 is( $ret,
-    GEARMAN_COMMAND_WORK_COMPLETE,
+    GEARMAN_NO_SERVERS,
     'grab_job() method returns expected value...'
 );
 
