@@ -185,9 +185,26 @@ sub work_loop {
         local $SIG{TERM} = $handler;
         local $SIG{INT}  = $handler;
 
+        my $error_conn = 0;
+
         while ($continue) {
-            my $work = $worker->work;
-            next if $work == GEARMAN_SUCCESS;
+            my $work = $worker->work;            
+            if ($work == GEARMAN_SUCCESS) {
+                $error_conn = 0;
+                next;
+            }                        
+
+            warn "GEARMAN STATUS: $work" if $work != GEARMAN_NO_JOBS && $work != GEARMAN_TIMEOUT;
+
+            if ($work == GEARMAN_COULD_NOT_CONNECT) {
+                $error_conn++;
+                if ($error_conn > 15) {
+                    $continue = 0;
+                }
+                sleep 1;
+                next;
+            }
+
             sleep 1, next if $work_ok->($work);
 
             warn $worker->error;
